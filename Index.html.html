@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>WISS Learn – Prototyp | ByteBros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#EEF1F6; --card:#FFFFFF; --text:#171A21; --muted:#667085; --line:#E4E7EC;
+  --chipbg:#F2F4F7; --chipfg:#475467; --track:#EAECF0; --navbg:rgba(255,255,255,.94);
+  --inputbg:#FFFFFF; --btnbg:#171A21; --btnfg:#FFFFFF; --hero:#171A21;
+  --brand:#E2001A; --brand-dark:#B00014; --brand-soft:#FDECEE; --brandchip-fg:#B00014;
+  --ok:#12B76A; --ok-bg:#ECFDF3; --ok-line:#A6F4C5; --okchip-fg:#067647;
+  --bad:#D92D20; --bad-bg:#FEF3F2; --bad-line:#FECDCA;
+  --amber:#F79009; --amber-bg:#FFFAEB; --amber-line:#FEDF89; --fire-fg:#B54708;
+  --r:16px;
+}
+body[data-theme="dark"]{
+  --bg:#0F1216; --card:#171C23; --text:#E8EAEF; --muted:#98A2B3; --line:#2A313C;
+  --chipbg:#232A34; --chipfg:#C6CCD6; --track:#2A313C; --navbg:rgba(18,22,28,.92);
+  --inputbg:#11151B; --btnbg:#F2F4F7; --btnfg:#12151B; --hero:#1B222C;
+  --brand:#FF3B4E; --brand-dark:#FF6B77; --brand-soft:rgba(226,0,26,.18); --brandchip-fg:#FF8A92;
+  --ok:#32D583; --ok-bg:rgba(18,183,106,.13); --ok-line:rgba(50,213,131,.45); --okchip-fg:#5FE3A1;
+  --bad:#F97066; --bad-bg:rgba(217,45,32,.15); --bad-line:rgba(249,112,102,.45);
+  --amber:#FDB022; --amber-bg:rgba(247,144,9,.14); --amber-line:rgba(253,176,34,.4); --fire-fg:#FDB022;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:#0E1013;
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+/* ---------- Bühne (Desktop) ---------- */
+.stage{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:72px;padding:40px;
+  background:
+    linear-gradient(180deg, rgba(226,0,26,.06), transparent 40%),
+    radial-gradient(900px 500px at 80% 20%, rgba(226,0,26,.10), transparent 60%),
+    #0E1013;}
+.stage-info{max-width:380px;color:#F4F5F7}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#FF4757;margin-bottom:14px}
+.stage-info h1{font-family:'Archivo',sans-serif;font-weight:900;font-size:52px;line-height:1.02;letter-spacing:-.02em;margin-bottom:16px}
+.stage-info h1 .dot{color:#E2001A}
+.stage-info p.lead{color:#B9BEC7;font-size:15px;line-height:1.6;margin-bottom:26px}
+.stage-block{border-left:2px solid #E2001A;padding-left:16px;margin-bottom:22px}
+.stage-block h3{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#8A909B;margin-bottom:8px}
+.stage-block ul{list-style:none;font-size:14px;color:#D7DAE0;line-height:1.9}
+.stage-block li b{color:#fff;font-weight:600}
+.stage-foot{font-size:12px;color:#6E7480;line-height:1.7}
+/* ---------- Phone ---------- */
+.phone{width:400px;height:830px;flex:0 0 auto;background:#050607;border-radius:52px;padding:12px;
+  box-shadow:0 40px 90px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.07), inset 0 0 0 2px #1B1E23;}
+.phone-screen{width:100%;height:100%;border-radius:40px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;position:relative;transition:background .25s}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#050607;border-radius:14px;z-index:60}
+#view{flex:1;overflow-y:auto;overflow-x:hidden;padding:56px 18px 96px;scroll-behavior:smooth}
+#view::-webkit-scrollbar{width:0}
+/* ---------- Bottom-Nav ---------- */
+#nav{position:absolute;left:0;right:0;bottom:0;background:var(--navbg);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.navbtn{flex:1;padding:10px 0 12px;border:none;background:none;cursor:pointer;font-family:inherit;
+  display:flex;flex-direction:column;align-items:center;gap:3px;color:#98A2B3;font-size:10px;font-weight:600}
+.navbtn .ico{font-size:20px;line-height:1;filter:grayscale(1);opacity:.55;transition:.15s}
+.navbtn.active{color:var(--brand)}
+.navbtn.active .ico{filter:none;opacity:1;transform:translateY(-1px)}
+/* ---------- Bausteine ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card.soft{background:var(--chipbg)}
+.screen-title{font-family:'Archivo',sans-serif;font-weight:800;font-size:24px;margin-bottom:4px}
+.screen-sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+.section-h{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:14px;font-family:inherit;font-size:15px;
+  font-weight:700;cursor:pointer;background:var(--btnbg);color:var(--btnfg);transition:transform .1s, opacity .15s}
+.btn:active{transform:scale(.98)}
+.btn.red{background:var(--brand);color:#fff}
+.btn.ghost{background:transparent;color:var(--text);border:1.5px solid var(--line)}
+.btn.small{padding:10px;font-size:13px;border-radius:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ms{background:var(--card);color:var(--text);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:10px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--chipbg);color:var(--chipfg)}
+.chip.fire{background:var(--amber-bg);color:var(--fire-fg)}
+.chip.red{background:var(--brand-soft);color:var(--brandchip-fg)}
+.chip.green{background:var(--ok-bg);color:var(--okchip-fg)}
+.progress{height:8px;background:var(--track);border-radius:99px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--btnbg);border-radius:99px;transition:width .35s}
+.progress.red>i{background:var(--brand)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input[type=text],input[type=password],select,textarea{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;
+  font-family:inherit;font-size:15px;background:var(--inputbg);color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--btnbg);outline-offset:0;border-color:var(--btnbg)}
+label.fl{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:12px 0 6px}
+.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;font-weight:600;margin:14px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+/* ---------- Antwort-Optionen ---------- */
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px;margin-bottom:10px;
+  background:var(--card);border:1.5px solid var(--line);border-radius:14px;font-family:inherit;font-size:14.5px;
+  font-weight:500;color:var(--text);cursor:pointer;transition:border-color .15s, background .15s}
+.opt .key{flex:0 0 26px;height:26px;border-radius:8px;background:var(--chipbg);color:var(--chipfg);font-size:12px;
+  font-weight:700;display:flex;align-items:center;justify-content:center}
+.opt:not(:disabled):hover{border-color:#98A2B3}
+.opt.sel{border-color:var(--btnbg)}
+.opt.sel .key{background:var(--btnbg);color:var(--btnfg)}
+.opt.correct{border-color:var(--ok);background:var(--ok-bg)}
+.opt.correct .key{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.wrong .key{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+.feedback{border-radius:14px;padding:14px;margin-top:4px;font-size:13.5px;line-height:1.55;animation:pop .25s}
+.feedback.good{background:var(--ok-bg);border:1px solid var(--ok-line)}
+.feedback.badd{background:var(--bad-bg);border:1px solid var(--bad-line)}
+.feedback .fb-title{font-weight:800;font-size:14px;margin-bottom:6px}
+.feedback .tutor{display:flex;gap:8px;margin-top:8px;padding-top:10px;border-top:1px dashed var(--line)}
+.feedback .tutor .ai{flex:0 0 auto;font-size:16px}
+.feedback .tutor b{font-weight:700}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+/* XP-Float */
+.xpfloat{position:absolute;right:24px;font-weight:800;color:var(--amber);font-size:15px;z-index:70;
+  animation:xpfly 1.1s ease-out forwards;pointer-events:none}
+@keyframes xpfly{from{opacity:0;transform:translateY(6px)}20%{opacity:1}to{opacity:0;transform:translateY(-42px)}}
+/* ---------- Overlay (MS-Login / Tocco-Sync) ---------- */
+.overlay{position:absolute;inset:0;z-index:80;background:var(--bg);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;padding:30px;text-align:center;animation:pop .2s}
+.spinner{width:38px;height:38px;border-radius:50%;border:4px solid var(--track);border-top-color:var(--brand);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.overlay .ov-title{font-weight:800;font-size:15px}
+.overlay .ov-sub{font-size:12.5px;color:var(--muted);line-height:1.6}
+/* ---------- Login ---------- */
+.login-wrap{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:10px 6px;position:relative}
+.logo-big{font-family:'Archivo',sans-serif;font-weight:900;font-size:38px;letter-spacing:-.02em;margin-bottom:6px}
+.logo-big .dot{color:var(--brand)}
+.logo-mark{width:52px;height:52px;border-radius:16px;background:var(--brand);color:#fff;font-family:'Archivo',sans-serif;
+  font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  box-shadow:0 10px 24px rgba(226,0,26,.35)}
+.theme-fab{position:absolute;top:0;right:0;width:40px;height:40px;border-radius:12px;border:1.5px solid var(--line);
+  background:var(--card);font-size:18px;cursor:pointer}
+/* ---------- Home ---------- */
+.hero-unit{background:var(--hero);color:#fff;border:none;border-radius:20px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden}
+.hero-unit::after{content:"";position:absolute;right:-30px;top:-30px;width:130px;height:130px;border-radius:50%;background:rgba(226,0,26,.25)}
+.hero-unit h3{font-family:'Archivo',sans-serif;font-size:18px;font-weight:800;margin:4px 0 4px}
+.hero-unit p{color:#C9CDD4;font-size:12.5px;margin-bottom:14px;position:relative;z-index:1}
+.hero-unit .btn{background:#fff;color:#171A21;position:relative;z-index:1}
+.stat-tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;text-align:center}
+.stat-tile .big{font-family:'Archivo',sans-serif;font-weight:800;font-size:22px}
+.stat-tile .lbl{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px}
+/* ---------- Module ---------- */
+.mod{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.mod:hover{border-color:#98A2B3}
+.mod.locked{opacity:.55;cursor:default}
+.mod .mico{flex:0 0 44px;height:44px;border-radius:12px;background:var(--chipbg);font-size:22px;display:flex;align-items:center;justify-content:center}
+.mod .minfo{flex:1;min-width:0}
+.mod .minfo h4{font-size:14.5px;font-weight:700}
+.mod .minfo p{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+.mod .mprog{margin-top:8px}
+/* ---------- ZP ---------- */
+.timer{font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;padding:6px 12px;border-radius:10px;background:var(--btnbg);color:var(--btnfg)}
+.timer.low{background:var(--brand);color:#fff;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.65}}
+.grade-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0 4px}
+.gauge{position:relative;width:170px;height:170px;margin-bottom:8px}
+.gauge svg{transform:rotate(-90deg)}
+.gauge .gnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge .gnum .note{font-family:'Archivo',sans-serif;font-weight:900;font-size:44px;line-height:1;animation:stampin .45s cubic-bezier(.2,1.4,.4,1)}
+.gauge .gnum .nlbl{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+@keyframes stampin{from{transform:scale(1.6);opacity:0}to{transform:scale(1);opacity:1}}
+.review-q{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;font-size:13px}
+.review-q .rq-t{font-weight:600;margin-bottom:6px}
+.review-q .rq-a{display:flex;gap:6px;align-items:flex-start;color:var(--muted)}
+.review-q .rq-a b{font-weight:700;color:var(--text)}
+.review-q.good{border-color:var(--ok-line);background:var(--ok-bg)}
+.review-q.badq{border-color:var(--bad-line);background:var(--bad-bg)}
+/* ---------- Statistik / Badges ---------- */
+.badge{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:12px 6px;text-align:center}
+.badge .bico{font-size:26px}
+.badge .bname{font-size:10.5px;font-weight:700;color:var(--chipfg);line-height:1.3}
+.badge.off{opacity:.35;filter:grayscale(1)}
+.result-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+.result-row:last-child{border-bottom:none}
+.result-row .rnote{margin-left:auto;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px}
+.result-row .rnote.g{color:var(--ok)} .result-row .rnote.b{color:var(--bad)}
+/* ---------- Admin ---------- */
+.qitem{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;font-size:13px;display:flex;gap:8px;align-items:flex-start}
+.qitem .qn{flex:0 0 auto;font-weight:800;color:var(--muted)}
+.tag-custom{font-size:10px;font-weight:800;color:var(--brandchip-fg);background:var(--brand-soft);border-radius:6px;padding:2px 6px;margin-left:6px}
+/* ---------- Konfetti ---------- */
+.confetti{position:absolute;top:-14px;width:8px;height:14px;z-index:75;pointer-events:none;animation:cfall linear forwards}
+@keyframes cfall{to{transform:translateY(900px) rotate(720deg);opacity:.85}}
+/* ---------- QR (Bühne) ---------- */
+.qr-box{margin-top:20px;background:#fff;border-radius:14px;padding:12px 14px;display:inline-flex;flex-direction:column;align-items:center;gap:8px}
+.qr-box .qcap{font-size:11px;font-weight:800;color:#171A21;letter-spacing:.04em}
+/* ---------- Responsive ---------- */
+@media(max-width:980px){
+  .stage{padding:0;gap:0}
+  .stage-info{display:none}
+  .phone{width:100vw;height:100vh;height:100dvh;border-radius:0;padding:0;box-shadow:none}
+  .phone-screen{border-radius:0}
+  .notch{display:none}
+  #view{padding-top:26px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <!-- Präsentations-Seitenleiste (nur Desktop / Beamer) -->
+  <aside class="stage-info">
+    <div class="kicker">Modul 245 · Klickbarer Prototyp v3</div>
+    <h1>WISS<br>Learn<span class="dot">.</span></h1>
+    <p class="lead">Micro-Learning für WISS-Lernende: täglich 5–15 Minuten gezielt auf Prüfungen vorbereiten – unterwegs, modulbasiert, mit ZP-Modus und automatischer Benotung.</p>
+    <div class="stage-block">
+      <h3>So testest du den Prototyp</h3>
+      <ul>
+        <li><b>1.</b> Anmelden – klassisch oder «Mit Microsoft» (simuliert)</li>
+        <li><b>2.</b> Modul wählen &amp; Lerneinheit starten</li>
+        <li><b>3.</b> Sofort-Feedback &amp; KI-Tutor ansehen</li>
+        <li><b>4.</b> ZP starten → Timer → Note 1–6</li>
+        <li><b>5.</b> Statistik, Streak, Badges &amp; Fehler-Kartei</li>
+        <li><b>6.</b> Profil: Dunkelmodus, Tocco-Sync, Lehrpersonen-Modus</li>
+      </ul>
+    </div>
+    <div class="stage-block">
+      <h3>Gruppe 1 · ByteBros</h3>
+      <ul><li>Mathushan · Viktor · Egzon · Kevin</li></ul>
+    </div>
+    <div id="qrwrap"></div>
+    <p class="stage-foot">Proof of Concept als Web-Demo (eine HTML-Datei, ohne Backend). Login, Microsoft-SSO und Tocco-Synchronisation sind simuliert – produktiv via Entra ID (OAuth2/OIDC) und Tocco-API. Zielplattform der echten App: React Native für iOS &amp; Android.</p>
+  </aside>
+
+  <!-- Phone-Mockup -->
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div id="view"></div>
+      <nav id="nav" style="display:none">
+        <button class="navbtn" data-r="home" onclick="go('home')"><span class="ico">🏠</span>Home</button>
+        <button class="navbtn" data-r="modules" onclick="go('modules')"><span class="ico">📚</span>Module</button>
+        <button class="navbtn" data-r="zpSelect" onclick="go('zpSelect')"><span class="ico">⚡</span>ZP</button>
+        <button class="navbtn" data-r="stats" onclick="go('stats')"><span class="ico">📊</span>Statistik</button>
+        <button class="navbtn" data-r="profile" onclick="go('profile')"><span class="ico">👤</span>Profil</button>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =====================================================
+   WISS Learn – Klickbarer Prototyp v2 (ByteBros, Modul 245)
+   Eine Datei, kein Backend. Login / Microsoft-SSO / Tocco-
+   Sync sind simuliert. Daten bleiben lokal im Browser.
+   ===================================================== */
+
+/* ---------- Fragenpools ---------- */
+const QUESTIONS = {
+  net: [
+    {t:"Auf welcher OSI-Schicht arbeitet ein Router mit IP-Adressen?",
+     o:["Schicht 2 – Sicherung","Schicht 3 – Vermittlung","Schicht 4 – Transport","Schicht 7 – Anwendung"],c:1,
+     e:"Router arbeiten auf Schicht 3 (Network Layer). Dort findet die logische Adressierung mit IP statt – Switches arbeiten dagegen auf Schicht 2 mit MAC-Adressen."},
+    {t:"Wie viele nutzbare Host-Adressen bietet ein /26-Subnetz?",
+     o:["30","62","64","126"],c:1,
+     e:"/26 bedeutet 64 Adressen total (2⁶). Minus Netz- und Broadcast-Adresse bleiben 62 nutzbare Hosts."},
+    {t:"Was ist der Hauptzweck von VLANs?",
+     o:["Höhere WLAN-Reichweite","Logische Trennung von Netzen auf demselben Switch","Automatische IP-Vergabe","Verschlüsselung des Datenverkehrs"],c:1,
+     e:"VLANs segmentieren ein physisches Netz logisch. So lassen sich z.B. Lernende und Verwaltung auf demselben Switch sauber trennen."},
+    {t:"Welches Protokoll löst Hostnamen wie wiss.ch in IP-Adressen auf?",
+     o:["DHCP","DNS","ARP","SNMP"],c:1,
+     e:"DNS (Domain Name System) übersetzt Namen in IP-Adressen. ARP löst dagegen IP- in MAC-Adressen auf."},
+    {t:"In welcher Reihenfolge läuft die DHCP-Adressvergabe ab?",
+     o:["Offer → Discover → Ack → Request","Discover → Offer → Request → Ack","Request → Offer → Discover → Ack","Discover → Request → Offer → Ack"],c:1,
+     e:"Merkhilfe DORA: Discover, Offer, Request, Acknowledge."},
+    {t:"Welcher Standard-Port gehört zu HTTPS?",
+     o:["80","22","443","3306"],c:2,
+     e:"HTTPS nutzt Port 443. Port 80 = HTTP, 22 = SSH, 3306 = MySQL."},
+    {t:"Welches Gerät trennt standardmässig Broadcast-Domänen?",
+     o:["Hub","Switch","Repeater","Router"],c:3,
+     e:"Router (bzw. Layer-3-Geräte) trennen Broadcast-Domänen. Switches trennen nur Kollisionsdomänen."},
+    {t:"Wofür steht der Standard IEEE 802.1Q?",
+     o:["WLAN-Verschlüsselung","VLAN-Tagging auf Trunk-Ports","Spanning Tree Protocol","Power over Ethernet"],c:1,
+     e:"802.1Q definiert das VLAN-Tagging: Frames erhalten auf Trunk-Ports einen Tag mit der VLAN-ID."}
+  ],
+  sql: [
+    {t:"Mit welchem SQL-Befehl liest man Daten aus einer Tabelle?",
+     o:["GET","SELECT","READ","FETCH"],c:1,
+     e:"SELECT ist der Lesebefehl in SQL, z.B. SELECT * FROM albums;"},
+    {t:"Welche Aufgabe hat ein PRIMARY KEY?",
+     o:["Er beschleunigt alle Abfragen","Er identifiziert jede Zeile eindeutig","Er verschlüsselt die Tabelle","Er sortiert die Daten alphabetisch"],c:1,
+     e:"Der Primärschlüssel identifiziert jeden Datensatz eindeutig – er darf nie NULL sein und kommt pro Tabelle nur einmal pro Zeile vor."},
+    {t:"Welcher JOIN liefert nur Zeilen, die in beiden Tabellen eine Übereinstimmung haben?",
+     o:["LEFT JOIN","INNER JOIN","FULL OUTER JOIN","CROSS JOIN"],c:1,
+     e:"INNER JOIN liefert nur passende Paare. LEFT JOIN behält zusätzlich alle Zeilen der linken Tabelle."},
+    {t:"Wozu dient GROUP BY?",
+     o:["Zum Sortieren der Ausgabe","Zum Gruppieren von Zeilen für Aggregatfunktionen","Zum Verbinden zweier Tabellen","Zum Löschen von Duplikaten"],c:1,
+     e:"GROUP BY fasst Zeilen zu Gruppen zusammen, z.B. COUNT(*) pro Genre. Sortiert wird mit ORDER BY."},
+    {t:"Wie bildet man eine m:n-Beziehung (z.B. Alben ↔ Genres) sauber ab?",
+     o:["Mit einer Zwischentabelle","Mit einem zweiten PRIMARY KEY","Mit einer VIEW","Mit einem UNIQUE-Index"],c:0,
+     e:"Eine m:n-Beziehung braucht eine Zwischentabelle (z.B. albums_has_genres) mit den Fremdschlüsseln beider Tabellen."},
+    {t:"Was ist eine VIEW?",
+     o:["Eine Kopie der Tabelle","Eine gespeicherte Abfrage, die wie eine virtuelle Tabelle wirkt","Ein automatisches Backup","Ein spezieller Index"],c:1,
+     e:"Eine View speichert die Abfrage, nicht die Daten. Beim Aufruf wird sie jeweils frisch ausgeführt."},
+    {t:"Was ist der Unterschied zwischen WHERE und HAVING?",
+     o:["Es gibt keinen Unterschied","WHERE filtert vor, HAVING nach der Gruppierung","HAVING ist einfach schneller","WHERE funktioniert nur mit Zahlen"],c:1,
+     e:"WHERE filtert einzelne Zeilen vor dem GROUP BY, HAVING filtert die fertigen Gruppen – z.B. HAVING COUNT(*) > 5."},
+    {t:"Eine Jahreszahl wie 2023 wird als VARCHAR gespeichert. Was ist das Problem?",
+     o:["Gar keines","Zahlenvergleiche und Sortierung funktionieren nicht zuverlässig","VARCHAR ist dafür zu klein","SQL erlaubt keine Jahreszahlen"],c:1,
+     e:"Als Text vergleicht die DB zeichenweise – Bedingungen wie > 2020 werden fehleranfällig. Besser: YEAR oder SMALLINT."}
+  ],
+  docker: [
+    {t:"Was ist der Unterschied zwischen einem Image und einem Container?",
+     o:["Es gibt keinen","Ein Container ist eine laufende Instanz eines Images","Ein Image ist die laufende Instanz eines Containers","Images gibt es nur in der Cloud"],c:1,
+     e:"Das Image ist die unveränderliche Vorlage (Read-only-Layers), der Container die laufende Instanz mit eigener Schreibschicht."},
+    {t:"Wozu dient ein Dockerfile?",
+     o:["Zum Starten von Containern","Als Bauanleitung für ein Image","Zum Sichern von Volumes","Zur Netzwerkkonfiguration"],c:1,
+     e:"Ein Dockerfile beschreibt Schritt für Schritt (FROM, COPY, RUN, CMD …), wie ein Image gebaut wird – ausgeführt mit docker build."},
+    {t:"Was bewirkt docker run -p 8080:80?",
+     o:["Öffnet Port 8080 im Container","Leitet Host-Port 8080 auf Container-Port 80 weiter","Startet 8080 Container","Begrenzt die Bandbreite"],c:1,
+     e:"Syntax: -p HOST:CONTAINER. Anfragen an Port 8080 des Hosts landen auf Port 80 im Container."},
+    {t:"Wozu dienen Volumes in Docker?",
+     o:["Zur Lautstärkeregelung","Zum dauerhaften Speichern von Daten ausserhalb des Containers","Zum Beschleunigen des Builds","Zum Verschlüsseln von Images"],c:1,
+     e:"Container sind vergänglich – Volumes halten Daten (z.B. eine Datenbank) über Neustarts und Rebuilds hinweg."},
+    {t:"Was macht Docker Compose?",
+     o:["Es baut nur einzelne Images","Es definiert und startet Multi-Container-Setups über eine YAML-Datei","Es ersetzt das Dockerfile","Es überwacht die CPU"],c:1,
+     e:"In der compose.yaml werden mehrere Services (z.B. Web + DB) samt Netzwerken und Volumes deklariert – Start mit docker compose up -d."},
+    {t:"Welcher Befehl zeigt alle laufenden Container?",
+     o:["docker images","docker ps","docker run","docker logs"],c:1,
+     e:"docker ps listet laufende Container, mit -a auch gestoppte. docker images zeigt dagegen die lokalen Images."},
+    {t:"Worin unterscheidet sich ein Container von einer VM?",
+     o:["Container virtualisieren die Hardware, VMs nicht","Container teilen sich den Host-Kernel, VMs bringen ein eigenes Betriebssystem mit","VMs starten immer schneller","Es gibt keinen Unterschied"],c:1,
+     e:"Container nutzen den Kernel des Hosts und sind darum leichtgewichtig. VMs emulieren komplette Hardware mit eigenem OS."},
+    {t:"Wofür wird ein Reverse Proxy (z.B. nginx) vor Containern eingesetzt?",
+     o:["Zum Bauen von Images","Er verteilt Anfragen auf die Dienste und terminiert HTTPS","Er ersetzt Docker Compose","Er löscht alte Container"],c:1,
+     e:"Der Reverse Proxy nimmt Anfragen zentral entgegen, leitet sie an die richtigen Container weiter und übernimmt TLS (z.B. Let's Encrypt)."}
+  ],
+  linux: [
+    {t:"Was ist der Unterschied zwischen apt und dpkg?",
+     o:["Es gibt keinen","apt löst Abhängigkeiten auf und nutzt Repositories, dpkg installiert nur einzelne .deb-Pakete","dpkg ist einfach neuer als apt","apt funktioniert nur mit grafischer Oberfläche"],c:1,
+     e:"apt ist das High-Level-Tool mit Repositories und Abhängigkeitsauflösung. dpkg installiert lokale .deb-Pakete ohne Abhängigkeiten nachzuladen."},
+    {t:"Was bedeutet die Berechtigung 754 bei chmod?",
+     o:["rwx r-x r--","rwx rw- r--","r-- r-x rwx","rw- rw- rw-"],c:0,
+     e:"7 = rwx (Besitzer), 5 = r-x (Gruppe), 4 = r-- (Andere). Merkhilfe: r=4, w=2, x=1."},
+    {t:"Mit welchem Befehl startest du einen Dienst unter systemd neu?",
+     o:["service --reboot","systemctl restart <dienst>","sudo reboot service","initctl new <dienst>"],c:1,
+     e:"systemctl restart apache2 – Status danach mit systemctl status prüfen. Und: Platzhalter wie <dienst> immer durch den echten Namen ersetzen!"},
+    {t:"In welcher Datei sind die lokalen Benutzerkonten hinterlegt?",
+     o:["/etc/shadow","/etc/passwd","/etc/group","/home/users.conf"],c:1,
+     e:"/etc/passwd enthält die Konten (Name, UID, Shell …). Die Passwort-Hashes liegen separat und geschützt in /etc/shadow."},
+    {t:"Was macht der Befehl useradd -m viktor?",
+     o:["Legt den Benutzer ohne Home-Verzeichnis an","Legt den Benutzer inklusive Home-Verzeichnis an","Löscht den Benutzer","Ändert nur das Passwort"],c:1,
+     e:"-m (make home) erstellt /home/viktor gleich mit. Das Passwort setzt man danach mit passwd viktor."},
+    {t:"Welcher Dienst beantwortet auf einem Ubuntu-Server typischerweise DNS-Anfragen?",
+     o:["isc-dhcp-server","bind9","nginx","snmpd"],c:1,
+     e:"bind9 ist der klassische DNS-Server, Zonendateien liegen unter /etc/bind/. isc-dhcp-server verteilt dagegen IP-Adressen."},
+    {t:"Wie prüfst du die Belegung der Dateisysteme?",
+     o:["du -x","df -h","ls -lh","top"],c:1,
+     e:"df -h zeigt die Auslastung pro Dateisystem menschenlesbar an. du misst dagegen die Grösse einzelner Verzeichnisse."},
+    {t:"Wozu dient sudo?",
+     o:["Zum Wechseln des Verzeichnisses","Einzelne Befehle mit erhöhten Rechten ausführen","Zum Neustarten des Servers","Zum Anzeigen von Logdateien"],c:1,
+     e:"sudo führt Befehle mit Root-Rechten aus – sauberer und nachvollziehbarer, als dauerhaft als root zu arbeiten (Least Privilege)."}
+  ],
+  sec: [
+    {t:"Wofür steht die CIA-Triade in der IT-Sicherheit?",
+     o:["Client, Internet, Access","Vertraulichkeit, Integrität, Verfügbarkeit","Cloud, Infrastruktur, Anwendung","Code, Identität, Authentifizierung"],c:1,
+     e:"Confidentiality, Integrity, Availability – die drei Schutzziele, an denen sich jede Sicherheitsmassnahme messen lässt."},
+    {t:"Was ist Phishing?",
+     o:["Ein Virenscanner","Betrügerische Nachrichten, die Zugangsdaten abgreifen wollen","Ein Verschlüsselungsverfahren","Ein Netzwerkprotokoll"],c:1,
+     e:"Phishing täuscht vertrauenswürdige Absender vor (z.B. Bank, IT-Support), um Passwörter oder Codes zu stehlen."},
+    {t:"Welchen Vorteil bietet Zwei-Faktor-Authentifizierung (2FA)?",
+     o:["Schnellerer Login","Schutz auch bei gestohlenem Passwort","Es braucht gar kein Passwort mehr","Automatische Software-Updates"],c:1,
+     e:"Selbst wenn das Passwort geleakt ist, fehlt dem Angreifer der zweite Faktor (App, Token, Fingerabdruck)."},
+    {t:"Was macht eine Firewall grundsätzlich?",
+     o:["Sie filtert Datenverkehr anhand von Regeln","Sie entfernt Viren von der Festplatte","Sie beschleunigt das Internet","Sie verschlüsselt Festplatten"],c:0,
+     e:"Eine Firewall erlaubt oder blockiert Verbindungen anhand von Regeln (Quelle, Ziel, Port, Protokoll)."},
+    {t:"Was kennzeichnet symmetrische Verschlüsselung?",
+     o:["Zwei verschiedene Schlüssel","Derselbe Schlüssel für Ver- und Entschlüsselung","Es ist kein Schlüssel nötig","Sie eignet sich nur für E-Mails"],c:1,
+     e:"Symmetrisch = ein gemeinsamer Schlüssel (z.B. AES). Asymmetrisch = Schlüsselpaar aus Public und Private Key (z.B. RSA)."},
+    {t:"Was ist ein Brute-Force-Angriff?",
+     o:["Physisches Aufbrechen eines Servers","Systematisches Durchprobieren aller möglichen Passwörter","Ein DDoS-Angriff","Das Fälschen von Absenderadressen"],c:1,
+     e:"Der Angreifer testet automatisiert alle Kombinationen. Gegenmittel: lange Passwörter, Sperren nach Fehlversuchen, 2FA."},
+    {t:"Was macht Ransomware?",
+     o:["Sie zeigt nur Werbung an","Sie verschlüsselt Daten und fordert Lösegeld","Sie beschleunigt den PC","Sie stiehlt ausschliesslich Cookies"],c:1,
+     e:"Ransomware verschlüsselt Dateien und erpresst die Opfer. Wichtigste Gegenmassnahme: Offline-Backups (3-2-1-Regel)."},
+    {t:"Was bedeutet das Prinzip «Least Privilege»?",
+     o:["Admins erhalten alle Rechte","Jede Person erhält nur die minimal nötigen Berechtigungen","Gäste haben grundsätzlich keinen Zugang","Passwörter müssen möglichst kurz sein"],c:1,
+     e:"Wer nur die Rechte hat, die er wirklich braucht, richtet bei Fehlern oder Kompromittierung weniger Schaden an."}
+  ],
+  math: [
+    {t:"Wie viel sind 15 % von 240?",
+     o:["24","32","36","48"],c:2,e:"240 · 0.15 = 36."},
+    {t:"Löse die Gleichung: 3x + 5 = 20",
+     o:["x = 3","x = 5","x = 7.5","x = 15"],c:1,e:"3x = 20 − 5 = 15 → x = 15 ÷ 3 = 5."},
+    {t:"(a + b)² = ?",
+     o:["a² + b²","a² + 2ab + b²","a² − 2ab + b²","2a + 2b"],c:1,
+     e:"Erste binomische Formel: (a + b)² = a² + 2ab + b². Der Mittelterm 2ab wird gern vergessen."},
+    {t:"Auf wie viele Arten kann man 3 aus 5 Elementen auswählen (ohne Reihenfolge)?",
+     o:["10","15","20","60"],c:0,
+     e:"Binomialkoeffizient: C(5,3) = 5! ÷ (3! · 2!) = 10. Ohne Reihenfolge → Kombination, nicht Variation."},
+    {t:"2⁵ · 2³ = ?",
+     o:["2⁸ = 256","2¹⁵","4⁸","2² = 4"],c:0,
+     e:"Bei gleicher Basis werden die Exponenten addiert: 2⁵ · 2³ = 2⁸ = 256."},
+    {t:"Wie gross ist der Umfang eines Kreises mit Radius 5 cm (gerundet)?",
+     o:["15.7 cm","25.0 cm","31.4 cm","78.5 cm"],c:2,
+     e:"U = 2πr = 2 · π · 5 ≈ 31.4 cm. (78.5 wäre die Fläche πr².)"}
+  ],
+  eng: [
+    {t:"If I ___ more time, I would learn Spanish.",
+     o:["have","had","would have","having"],c:1,
+     e:"Second conditional: If + past simple, would + infinitive → \"If I had more time, I would…\""},
+    {t:"Which linking word expresses contrast?",
+     o:["therefore","however","moreover","because"],c:1,
+     e:"\"However\" verbindet Gegensätze. \"Therefore\" = Folge, \"moreover\" = Ergänzung, \"because\" = Grund."},
+    {t:"She suggested ___ the meeting earlier.",
+     o:["to start","start","starting","started"],c:2,
+     e:"Nach \"suggest\" folgt das Gerundium (-ing): suggested starting."},
+    {t:"The report ___ by the team yesterday.",
+     o:["wrote","was written","is writing","has wrote"],c:1,
+     e:"Passiv im Past Simple: was/were + Past Participle → \"was written\"."},
+    {t:"Which phrasal verb means \"to postpone\"?",
+     o:["put off","put on","put up","put out"],c:0,
+     e:"\"Put off\" = verschieben. \"Put on\" = anziehen, \"put up\" = unterbringen/aufhängen, \"put out\" = löschen."},
+    {t:"I look forward to ___ from you.",
+     o:["hear","hearing","heard","be hearing"],c:1,
+     e:"\"to\" ist hier eine Präposition, danach folgt das Gerundium: looking forward to hearing."}
+  ]
+};
+
+/* g: "inf" = Informatik, "abu" = Allgemeinbildung & Sprachen */
+const MODULES = [
+  {id:"net",   g:"inf", name:"LAN-Netzwerke & Design",          code:"M129", icon:"🌐", desc:"OSI, VLAN, Subnetting, DHCP & DNS"},
+  {id:"sql",   g:"inf", name:"Datenbanken & SQL",               code:"M141", icon:"🗄️", desc:"SELECT, Joins, Views, Datenmodell"},
+  {id:"docker",g:"inf", name:"Dienste mit Containern",          code:"M169", icon:"🐳", desc:"Docker, Compose, Volumes, Reverse Proxy"},
+  {id:"linux", g:"inf", name:"Linux-Server betreiben",          code:"M188", icon:"🐧", desc:"apt, Rechte, systemd, bind9"},
+  {id:"sec",   g:"inf", name:"Datenschutz & IT-Sicherheit",     code:"M231", icon:"🔒", desc:"CIA-Triade, Verschlüsselung, Angriffe"},
+  {id:"m114",  g:"inf", name:"Codierung & Verschlüsselung",     code:"M114", icon:"🔐", locked:true},
+  {id:"m117",  g:"inf", name:"Netzinfrastruktur KMU",           code:"M117", icon:"🏢", locked:true},
+  {id:"m122",  g:"inf", name:"Abläufe mit Scripts automatisieren",code:"M122", icon:"📜", locked:true},
+  {id:"m123",  g:"inf", name:"Serverdienste in Betrieb nehmen", code:"M123", icon:"🖥️", locked:true},
+  {id:"m143",  g:"inf", name:"Backup & Restore",                code:"M143", icon:"💾", locked:true},
+  {id:"m145",  g:"inf", name:"Netzwerk betreiben & erweitern",  code:"M145", icon:"🔌", locked:true},
+  {id:"m159",  g:"inf", name:"Directoryservices",               code:"M159", icon:"📇", locked:true},
+  {id:"m162",  g:"inf", name:"Daten analysieren & modellieren", code:"M162", icon:"📈", locked:true},
+  {id:"m164",  g:"inf", name:"Datenbanken erstellen",           code:"M164", icon:"🧱", locked:true},
+  {id:"m187",  g:"inf", name:"ICT-Arbeitsplatz in Betrieb nehmen",code:"M187", icon:"🧰", locked:true},
+  {id:"m190",  g:"inf", name:"Virtualisierung einsetzen",       code:"M190", icon:"📦", locked:true},
+  {id:"m241",  g:"inf", name:"Innovative ICT-Lösungen initialisieren",code:"M241", icon:"💡", locked:true},
+  {id:"m293",  g:"inf", name:"Webauftritt erstellen",           code:"M293", icon:"🌍", locked:true},
+  {id:"m300",  g:"inf", name:"Dienste ins Netzwerk integrieren",code:"M300", icon:"🔗", locked:true},
+  {id:"m319",  g:"inf", name:"Applikationen entwerfen",         code:"M319", icon:"💻", locked:true},
+  {id:"m346",  g:"inf", name:"Cloud-Lösungen realisieren",      code:"M346", icon:"☁️", locked:true},
+  {id:"math",  g:"abu", name:"Mathematik",                      code:"ABU",  icon:"🧮", desc:"Prozente, Gleichungen, Kombinatorik"},
+  {id:"eng",   g:"abu", name:"Englisch B2",                     code:"B2",   icon:"🇬🇧", desc:"Grammar, Linking Words, Vocabulary"},
+  {id:"typ",   g:"abu", name:"Zehnfingersystem",                code:"ZFS",  icon:"⌨️", locked:true}
+];
+
+const RANKS = [
+  {min:0,    name:"Starter",        icon:"🌱"},
+  {min:100,  name:"Talent",         icon:"⭐"},
+  {min:300,  name:"Fortgeschritten",icon:"🚀"},
+  {min:700,  name:"Profi",          icon:"💎"},
+  {min:1200, name:"Master",         icon:"👑"}
+];
+
+/* ---------- State + Persistenz ---------- */
+const DEFAULT_STATE = () => ({
+  user:null, xp:240, streak:12, lastDay:null, unitsToday:0,
+  results:[
+    {d:"02.07.2026", m:"net", note:4.5, s:7, x:10},
+    {d:"04.07.2026", m:"sql", note:5.0, s:8, x:10},
+    {d:"05.07.2026", m:"sec", note:4.0, s:6, x:10}
+  ],
+  custom:{}, teacher:false, theme:"light", tocco:null, kartei:[], sound:true
+});
+let S = DEFAULT_STATE();
+
+function save(){
+  try{ localStorage.setItem("wisslearn_proto", JSON.stringify(S)); }catch(err){/* Demo läuft auch ohne Speicher */}
+}
+function load(){
+  try{
+    const raw = localStorage.getItem("wisslearn_proto");
+    if(raw){ S = Object.assign(DEFAULT_STATE(), JSON.parse(raw)); }
+  }catch(err){}
+}
+
+/* ---------- Theme ---------- */
+function applyTheme(){ document.body.dataset.theme = S.theme==="dark" ? "dark" : "light"; }
+function toggleTheme(rerender){
+  S.theme = S.theme==="dark" ? "light" : "dark";
+  applyTheme(); save();
+  if(rerender) go(route);
+}
+
+/* ---------- Helpers ---------- */
+const $view = () => document.getElementById("view");
+function esc(s){ return String(s).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch])); }
+function shuffle(a){ const x=a.slice(); for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [x[i],x[j]]=[x[j],x[i]];} return x; }
+function pool(modId){ return QUESTIONS[modId].concat(S.custom[modId]||[]); }
+function modById(id){ return MODULES.find(m=>m.id===id); }
+function playable(){ return MODULES.filter(m=>!m.locked); }
+function rank(){ let r=RANKS[0]; for(const x of RANKS){ if(S.xp>=x.min) r=x; } return r; }
+function nextRank(){ return RANKS.find(x=>x.min>S.xp) || null; }
+function today(){ return new Date().toLocaleDateString("de-CH"); }
+function nowTime(){ return new Date().toLocaleTimeString("de-CH",{hour:"2-digit",minute:"2-digit"}); }
+function swissNote(score,max){ return Math.round((5*score/max+1)*2)/2; }
+function fmtNote(n){ return n.toFixed(1); }
+function addXP(amount){
+  S.xp += amount; save();
+  const el=document.createElement("div");
+  el.className="xpfloat"; el.textContent="+"+amount+" XP";
+  el.style.top="120px";
+  document.querySelector(".phone-screen").appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+}
+function markDailyActivity(){
+  const t=today();
+  if(S.lastDay!==t){
+    if(S.lastDay!==null) S.streak+=1;
+    S.lastDay=t; S.unitsToday=0;
+  }
+  S.unitsToday+=1; save();
+}
+function showOverlay(title, sub, ms, cb){
+  const ov=document.createElement("div");
+  ov.className="overlay";
+  ov.innerHTML=`<div class="spinner"></div><div class="ov-title">${title}</div><div class="ov-sub">${sub}</div>`;
+  document.querySelector(".phone-screen").appendChild(ov);
+  setTimeout(()=>{ ov.remove(); cb(); }, ms);
+}
+/* ---------- Fehler-Kartei ---------- */
+function addToKartei(modId,q){
+  if(!S.kartei.some(k=>k.m===modId && k.q.t===q.t)){ S.kartei.push({m:modId,q:q}); save(); }
+}
+function removeFromKartei(modId,q){
+  S.kartei = S.kartei.filter(k=>!(k.m===modId && k.q.t===q.t)); save();
+}
+function startKartei(){
+  if(!S.kartei.length) return;
+  const items=shuffle(S.kartei).slice(0,10);
+  unit={kartei:true, qs:items.map(x=>x.q), srcMods:items.map(x=>x.m), i:0, correct:0, answered:false};
+  go("unitRun");
+}
+function karteiCard(){
+  if(!S.kartei.length) return "";
+  return `<div class="card">
+    <div class="row">
+      <div>
+        <b style="font-size:14px">🗂️ Fehler-Kartei</b>
+        <p style="font-size:12px;color:var(--muted);margin-top:3px">${S.kartei.length} Frage${S.kartei.length===1?"":"n"} warten auf die Revanche.</p>
+      </div>
+      <button class="btn small" style="width:auto;padding:9px 14px" onclick="startKartei()">Üben</button>
+    </div>
+  </div>`;
+}
+/* ---------- Konfetti & Sound ---------- */
+function confetti(){
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const host=document.querySelector(".phone-screen");
+  const colors=["#E2001A","#F79009","#12B76A","#2E90FA","#7A5AF8","#FDB022"];
+  for(let i=0;i<70;i++){
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.style.left=(Math.random()*100)+"%";
+    c.style.background=colors[i%colors.length];
+    c.style.transform="rotate("+Math.floor(Math.random()*360)+"deg)";
+    c.style.animationDuration=(2+Math.random()*1.8)+"s";
+    c.style.animationDelay=(Math.random()*0.5)+"s";
+    c.style.borderRadius=Math.random()<0.4?"50%":"2px";
+    host.appendChild(c);
+    setTimeout(()=>c.remove(),4500);
+  }
+}
+let audioCtx=null;
+function playFanfare(){
+  if(!S.sound) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>{
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.type="triangle"; o.frequency.value=f;
+      const t=audioCtx.currentTime + i*0.12;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.22,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.35);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t); o.stop(t+0.4);
+    });
+  }catch(err){/* Audio nicht verfügbar – Demo läuft trotzdem */}
+}
+function toggleSound(){ S.sound=!S.sound; save(); go("profile"); }
+/* ---------- QR-Code (Bühne) ---------- */
+function initQR(){
+  const wrap=document.getElementById("qrwrap");
+  if(!wrap) return;
+  const hosted=/^https?:$/.test(location.protocol) && location.hostname;
+  if(hosted && typeof QRCode!=="undefined"){
+    wrap.innerHTML='<div class="qr-box"><div id="qr"></div><div class="qcap">📱 Scanne &amp; teste live mit</div></div>';
+    new QRCode(document.getElementById("qr"),{text:location.href,width:120,height:120,colorDark:"#171A21",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+  }else{
+    wrap.innerHTML='<p class="stage-foot" style="margin-top:6px">📱 Der QR-Code fürs Publikum erscheint automatisch, sobald die Datei auf eurem Server (HTTPS) läuft.</p>';
+  }
+}
+/* ---------- CSV-Export (Lehrpersonen) ---------- */
+function exportCSV(){
+  const rows=[["Name","Datum","Modul","Code","Punkte","Max","Note"]];
+  S.results.forEach(x=>{
+    const m=modById(x.m);
+    rows.push([S.user?S.user.name:"", x.d, m.name, m.code, x.s, x.x, fmtNote(x.note).replace(".",",")]);
+  });
+  const csv="\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="WISSLearn_Noten_"+today().replace(/\./g,"-")+".csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+const MS_LOGO = `<svg width="18" height="18" viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg>`;
+
+/* ---------- Router ---------- */
+let route="login";
+let zpTimerId=null;
+function stopTimer(){ if(zpTimerId){ clearInterval(zpTimerId); zpTimerId=null; } }
+
+function go(r){
+  stopTimer();
+  route=r;
+  const nav=document.getElementById("nav");
+  const hideNav = (r==="login" || r==="zpRun");
+  nav.style.display = hideNav ? "none" : "flex";
+  document.querySelectorAll(".navbtn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.r===r || (r==="admin"&&b.dataset.r==="profile"));
+  });
+  const R={login:rLogin, home:rHome, modules:rModules, unitRun:rUnitRun, unitDone:rUnitDone,
+           zpSelect:rZpSelect, zpIntro:rZpIntro, zpRun:rZpRun, zpDone:rZpDone,
+           stats:rStats, profile:rProfile, admin:rAdmin};
+  (R[r]||rHome)();
+  $view().scrollTop=0;
+}
+
+/* ---------- Login ---------- */
+function rLogin(){
+  $view().innerHTML = `
+  <div class="login-wrap">
+    <button class="theme-fab" onclick="toggleTheme(true)" title="Hell/Dunkel">${S.theme==="dark"?"☀️":"🌙"}</button>
+    <div class="logo-mark">W</div>
+    <div class="logo-big">WISS Learn<span class="dot">.</span></div>
+    <p class="screen-sub" style="margin-bottom:24px">Micro-Learning für WISS-Lernende.<br>Täglich 5–15 Minuten – auch im Zug.</p>
+    <div class="card">
+      <button class="btn ms" onclick="msLogin()">${MS_LOGO} Mit Microsoft anmelden <span style="font-size:11px;color:var(--muted)">(WISS-Konto)</span></button>
+      <div class="divider">oder</div>
+      <label class="fl" for="li-name">Name</label>
+      <input type="text" id="li-name" placeholder="Vorname Nachname" value="Lena Meier">
+      <label class="fl" for="li-pw">Passwort</label>
+      <input type="password" id="li-pw" placeholder="Demo: beliebig, min. 4 Zeichen">
+      <label class="fl" for="li-lj">Lehrjahr</label>
+      <select id="li-lj">
+        <option>1. Lehrjahr</option>
+        <option selected>2. Lehrjahr</option>
+        <option>3. Lehrjahr</option>
+        <option>4. Lehrjahr</option>
+      </select>
+      <p id="li-msg" style="font-size:12px;color:var(--bad);margin-top:8px;display:none">⚠️ Bitte Name und ein Passwort mit mindestens 4 Zeichen eingeben.</p>
+      <div style="height:16px"></div>
+      <button class="btn red" onclick="doLogin()">Anmelden</button>
+    </div>
+    <p style="font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6">
+      Prototyp (Proof of Concept) – Anmeldung simuliert, keine echten Konten.<br>Alle Daten bleiben lokal in deinem Browser.
+    </p>
+  </div>`;
+}
+function doLogin(){
+  const name=document.getElementById("li-name").value.trim();
+  const pw=document.getElementById("li-pw").value;
+  const lj=document.getElementById("li-lj").value;
+  if(!name || pw.length<4){
+    document.getElementById("li-msg").style.display="block";
+    return;
+  }
+  S.user={name:name, lj:lj, ms:false}; save();
+  go("home");
+}
+function msLogin(){
+  showOverlay(
+    "Weiterleitung zu Microsoft …",
+    "login.microsoftonline.com<br>Anmeldung mit deinem WISS-Schulkonto (simuliert – produktiv via Entra ID / OAuth2).",
+    1500,
+    ()=>{
+      S.user={name:"Lena Meier", lj:"2. Lehrjahr", ms:true, mail:"lena.meier@stud.wiss.ch"};
+      save(); go("home");
+    }
+  );
+}
+
+/* ---------- Home ---------- */
+function rHome(){
+  const r=rank(), nr=nextRank();
+  const goal = S.lastDay===today() && S.unitsToday>0;
+  const last = S.results.length ? S.results[S.results.length-1] : null;
+  $view().innerHTML = `
+  <div class="row" style="margin-bottom:14px">
+    <div>
+      <div class="screen-title">Hoi ${esc(S.user.name.split(" ")[0])} 👋</div>
+      <div class="screen-sub" style="margin:0">Bereit für deine tägliche Einheit?</div>
+    </div>
+    <span class="chip fire">🔥 ${S.streak} Tage</span>
+  </div>
+
+  <div class="hero-unit">
+    <span class="chip" style="background:rgba(255,255,255,.14);color:#fff">Heutige Lerneinheit</span>
+    <h3>${goal ? "Tagesziel erreicht ✓" : "5 Fragen · ca. 5 Minuten"}</h3>
+    <p>${goal ? "Stark! Noch eine Runde bringt dir extra XP." : "Kurz üben, sofort Feedback erhalten – dein Streak wartet."}</p>
+    <button class="btn" onclick="go('modules')">${goal ? "Weiter üben" : "Jetzt starten"}</button>
+  </div>
+
+  ${S.tocco ? `
+  <div class="card">
+    <div class="row">
+      <div>
+        <b style="font-size:13.5px">📅 Aus Tocco: Nächste ZP</b>
+        <p style="font-size:12px;color:var(--muted);margin-top:3px">M141 Datenbanken & SQL · Mo, 13.07.2026</p>
+      </div>
+      <button class="btn small" style="width:auto;padding:9px 14px" onclick="startZp('sql')">Üben</button>
+    </div>
+  </div>` : ""}
+
+  <div class="grid2" style="margin-bottom:12px">
+    <div class="stat-tile"><div class="big">${S.xp}</div><div class="lbl">XP gesamt</div></div>
+    <div class="stat-tile"><div class="big">${r.icon} ${esc(r.name)}</div><div class="lbl">${nr ? (nr.min-S.xp)+" XP bis "+esc(nr.name) : "Höchster Rang"}</div></div>
+  </div>
+
+  ${karteiCard()}
+
+  <div class="card" style="cursor:pointer" onclick="go('zpSelect')">
+    <div class="row">
+      <div>
+        <b style="font-size:14.5px">⚡ ZP-Modus</b>
+        <p style="font-size:12.5px;color:var(--muted);margin-top:3px">Zeitgesteuerte Kurzprüfung mit Note 1–6 – wie im WISS-Unterricht.</p>
+      </div>
+      <span class="chip red">Start</span>
+    </div>
+  </div>
+
+  ${last ? `
+  <div class="card">
+    <div class="row">
+      <div>
+        <b style="font-size:14px">Letzte ZP: ${esc(modById(last.m).name)}</b>
+        <p style="font-size:12px;color:var(--muted);margin-top:3px">${esc(last.d)} · ${last.s}/${last.x} Punkte</p>
+      </div>
+      <span style="font-family:'Archivo';font-weight:800;font-size:22px;color:${last.note>=4?"var(--ok)":"var(--bad)"}">${fmtNote(last.note)}</span>
+    </div>
+  </div>` : ""}
+
+  <div class="card soft">
+    <div style="display:flex;gap:10px">
+      <div style="font-size:20px">🤖</div>
+      <div>
+        <b style="font-size:13.5px">KI-Tutor</b>
+        <p style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5">
+          Erklärt dir in jeder Lerneinheit falsche Antworten – gebunden an geprüfte WISS-Modulinhalte.
+        </p>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Module ---------- */
+function modCard(m){
+  if(m.locked){
+    return `<div class="mod locked">
+      <div class="mico">${m.icon}</div>
+      <div class="minfo"><h4>${esc(m.name)} <span class="chip" style="font-size:10px;padding:2px 7px;margin-left:4px">🔒 Bald</span></h4>
+      <p>${esc(m.code)}</p></div>
+    </div>`;
+  }
+  const done = S.results.filter(x=>x.m===m.id).length;
+  const best = S.results.filter(x=>x.m===m.id).reduce((a,x)=>Math.max(a,x.note),0);
+  const prog = Math.min(100, Math.round(done/3*100));
+  return `<div class="mod" onclick="startUnit('${m.id}')">
+    <div class="mico">${m.icon}</div>
+    <div class="minfo">
+      <h4>${esc(m.name)}</h4>
+      <p>${esc(m.code)} · ${esc(m.desc)}${best?` · Beste Note ${fmtNote(best)}`:""}</p>
+      <div class="progress mprog"><i style="width:${prog}%"></i></div>
+    </div>
+    <span style="color:#98A2B3;font-size:18px">›</span>
+  </div>`;
+}
+function rModules(){
+  const infPlay = MODULES.filter(m=>m.g==="inf" && !m.locked).map(modCard).join("");
+  const infLock = MODULES.filter(m=>m.g==="inf" && m.locked).map(modCard).join("");
+  const abu     = MODULES.filter(m=>m.g==="abu").map(modCard).join("");
+  $view().innerHTML = `
+    <div class="screen-title">Module</div>
+    <p class="screen-sub">Wähle ein Modul für deine Lerneinheit. Fortschritt = absolvierte ZPs (3 pro Modul). Inhalte direkt aus dem WISS-Lehrplan.</p>
+    ${karteiCard()}
+    <div class="section-h">Informatik · verfügbar</div>
+    ${infPlay}
+    <div class="section-h">Allgemeinbildung & Sprachen</div>
+    ${abu}
+    <div class="section-h">Informatik · in Arbeit</div>
+    ${infLock}`;
+}
+
+/* ---------- Lerneinheit ---------- */
+let unit=null;
+function startUnit(modId){
+  const qs=shuffle(pool(modId)).slice(0,5);
+  unit={mod:modId, qs:qs, i:0, correct:0, answered:false};
+  go("unitRun");
+}
+function rUnitRun(){
+  const q=unit.qs[unit.i];
+  const m=modById(unit.kartei ? unit.srcMods[unit.i] : unit.mod);
+  const opts=q.o.map((o,idx)=>`
+    <button class="opt" id="opt-${idx}" onclick="answerUnit(${idx})">
+      <span class="key">${"ABCD"[idx]}</span><span>${esc(o)}</span>
+    </button>`).join("");
+  $view().innerHTML = `
+    <div class="row" style="margin-bottom:12px">
+      <span class="chip">${unit.kartei?"🗂️ ":""}${m.icon} ${esc(m.name)}</span>
+      <span class="chip">Frage ${unit.i+1}/${unit.qs.length}</span>
+    </div>
+    <div class="progress" style="margin-bottom:18px"><i style="width:${(unit.i/unit.qs.length)*100}%"></i></div>
+    <div class="card">
+      <p style="font-size:16px;font-weight:600;line-height:1.5;margin-bottom:16px">${esc(q.t)}</p>
+      ${opts}
+      <div id="fb"></div>
+      <div id="nextwrap" style="display:none;margin-top:12px">
+        <button class="btn" onclick="nextUnit()">${unit.i+1<unit.qs.length ? "Weiter" : "Einheit abschliessen"}</button>
+      </div>
+    </div>`;
+}
+function answerUnit(idx){
+  if(unit.answered) return;
+  unit.answered=true;
+  const q=unit.qs[unit.i];
+  const good = idx===q.c;
+  const srcMod = unit.kartei ? unit.srcMods[unit.i] : unit.mod;
+  if(good){
+    unit.correct++; addXP(10);
+    if(unit.kartei) removeFromKartei(srcMod, q);
+  } else {
+    addXP(2);
+    addToKartei(srcMod, q);
+  }
+  q.o.forEach((_,k)=>{
+    const el=document.getElementById("opt-"+k);
+    el.disabled=true;
+    if(k===q.c) el.classList.add("correct");
+    else if(k===idx) el.classList.add("wrong");
+  });
+  document.getElementById("fb").innerHTML = `
+    <div class="feedback ${good?"good":"badd"}">
+      <div class="fb-title">${good?"✅ Richtig!":"❌ Leider falsch"}</div>
+      ${good?"":`Die richtige Antwort ist <b>${"ABCD"[q.c]}: ${esc(q.o[q.c])}</b>.`}
+      <div class="tutor"><span class="ai">🤖</span><span><b>KI-Tutor:</b> ${esc(q.e)}</span></div>
+    </div>`;
+  document.getElementById("nextwrap").style.display="block";
+}
+function nextUnit(){
+  unit.i++; unit.answered=false;
+  if(unit.i < unit.qs.length){ rUnitRun(); $view().scrollTop=0; }
+  else { markDailyActivity(); go("unitDone"); }
+}
+function rUnitDone(){
+  if(unit.kartei){
+    const rest=S.kartei.length;
+    $view().innerHTML = `
+      <div style="text-align:center;padding-top:26px">
+        <div style="font-size:54px;margin-bottom:8px">${rest===0?"🏆":"🗂️"}</div>
+        <div class="screen-title">Kartei-Runde beendet!</div>
+        <p class="screen-sub">${unit.correct}/${unit.qs.length} Revanchen geschafft</p>
+      </div>
+      <div class="card" style="text-align:center;${rest===0?"background:var(--ok-bg);border-color:var(--ok-line)":""}">
+        ${rest===0 ? "Deine Fehler-Kartei ist <b>leer</b> – alles sitzt! 🎉" : "Noch <b>"+rest+"</b> Frage"+(rest===1?"":"n")+" in der Fehler-Kartei."}
+      </div>
+      ${rest>0?`<button class="btn red" style="margin-bottom:10px" onclick="startKartei()">Weiter üben</button>`:""}
+      <button class="btn ghost" onclick="go('home')">Zurück zum Dashboard</button>`;
+    return;
+  }
+  const m=modById(unit.mod);
+  const pct=Math.round(unit.correct/unit.qs.length*100);
+  $view().innerHTML = `
+    <div style="text-align:center;padding-top:26px">
+      <div style="font-size:54px;margin-bottom:8px">${pct>=80?"🎉":pct>=50?"💪":"📖"}</div>
+      <div class="screen-title">Einheit abgeschlossen!</div>
+      <p class="screen-sub">${m.icon} ${esc(m.name)}</p>
+    </div>
+    <div class="grid2" style="margin-bottom:12px">
+      <div class="stat-tile"><div class="big">${unit.correct}/${unit.qs.length}</div><div class="lbl">Richtig</div></div>
+      <div class="stat-tile"><div class="big" style="color:var(--amber)">+${unit.correct*10 + (unit.qs.length-unit.correct)*2} XP</div><div class="lbl">Verdient</div></div>
+    </div>
+    <div class="card" style="text-align:center;background:var(--amber-bg);border-color:var(--amber-line)">
+      🔥 Streak: <b>${S.streak} Tage</b> – Tagesziel erreicht!
+    </div>
+    <button class="btn red" style="margin-bottom:10px" onclick="startZp('${unit.mod}')">⚡ Jetzt ZP zu diesem Modul</button>
+    <button class="btn ghost" onclick="go('home')">Zurück zum Dashboard</button>`;
+}
+
+/* ---------- ZP-Modus ---------- */
+let zp=null;
+function rZpSelect(){
+  const items=playable().map(m=>{
+    const n=Math.min(10,pool(m.id).length);
+    return `<div class="mod" onclick="startZp('${m.id}')">
+      <div class="mico">${m.icon}</div>
+      <div class="minfo"><h4>${esc(m.name)}</h4><p>${n} Fragen · ${n} Min · Note 1–6</p></div>
+      <span class="chip red">ZP</span>
+    </div>`;
+  }).join("");
+  $view().innerHTML = `
+    <div class="screen-title" style="color:var(--brand)">⚡ ZP-Modus</div>
+    <p class="screen-sub">Zeitgesteuerte Kurzprüfung wie im WISS-Unterricht: kein Feedback während der Prüfung, automatische Benotung am Schluss.</p>
+    ${items}`;
+}
+function startZp(modId){
+  const qs=shuffle(pool(modId)).slice(0,10);
+  zp={mod:modId, qs:qs, i:0, answers:new Array(qs.length).fill(null), t:qs.length*60, submitted:false};
+  go("zpIntro");
+}
+function rZpIntro(){
+  const m=modById(zp.mod);
+  $view().innerHTML = `
+    <div style="text-align:center;padding-top:30px">
+      <div class="logo-mark" style="margin:0 auto 16px">ZP</div>
+      <div class="screen-title">${esc(m.name)}</div>
+      <p class="screen-sub">Zwischenprüfung · Prototyp</p>
+    </div>
+    <div class="card">
+      <div class="result-row"><span>📋</span> <span>${zp.qs.length} Fragen (Multiple Choice)</span></div>
+      <div class="result-row"><span>⏱️</span> <span>${zp.qs.length} Minuten Zeitlimit</span></div>
+      <div class="result-row"><span>🎓</span> <span>Automatische Note 1–6, wird gespeichert</span></div>
+      <div class="result-row"><span>🚫</span> <span>Kein Feedback während der Prüfung</span></div>
+    </div>
+    <button class="btn red" style="margin-bottom:10px" onclick="go('zpRun')">Prüfung starten</button>
+    <button class="btn ghost" onclick="go('zpSelect')">Abbrechen</button>`;
+}
+function rZpRun(){
+  renderZpQuestion();
+  zpTimerId=setInterval(()=>{
+    zp.t--;
+    const el=document.getElementById("zptimer");
+    if(el){
+      el.textContent=fmtTime(zp.t);
+      el.classList.toggle("low", zp.t<=60);
+    }
+    if(zp.t<=0){ submitZp(); }
+  },1000);
+}
+function fmtTime(s){ s=Math.max(0,s); const m=Math.floor(s/60), r=s%60; return m+":"+String(r).padStart(2,"0"); }
+function renderZpQuestion(){
+  const q=zp.qs[zp.i];
+  const sel=zp.answers[zp.i];
+  const opts=q.o.map((o,idx)=>`
+    <button class="opt ${sel===idx?"sel":""}" onclick="pickZp(${idx})">
+      <span class="key">${"ABCD"[idx]}</span><span>${esc(o)}</span>
+    </button>`).join("");
+  const answeredCount=zp.answers.filter(a=>a!==null).length;
+  $view().innerHTML = `
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn ghost small" style="width:auto;padding:8px 12px" onclick="cancelZp()">✕</button>
+      <span class="chip">Frage ${zp.i+1}/${zp.qs.length}</span>
+      <span class="timer ${zp.t<=60?"low":""}" id="zptimer">${fmtTime(zp.t)}</span>
+    </div>
+    <div class="progress red" style="margin-bottom:18px"><i style="width:${(answeredCount/zp.qs.length)*100}%"></i></div>
+    <div class="card">
+      <p style="font-size:16px;font-weight:600;line-height:1.5;margin-bottom:16px">${esc(q.t)}</p>
+      ${opts}
+    </div>
+    <div class="grid2">
+      <button class="btn ghost" ${zp.i===0?"disabled":""} onclick="zpNav(-1)">‹ Zurück</button>
+      ${zp.i<zp.qs.length-1
+        ? `<button class="btn" onclick="zpNav(1)">Weiter ›</button>`
+        : `<button class="btn red" onclick="submitZp()">Prüfung abgeben</button>`}
+    </div>
+    ${answeredCount<zp.qs.length && zp.i===zp.qs.length-1
+      ? `<p style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px">Noch ${zp.qs.length-answeredCount} Frage(n) unbeantwortet.</p>`:""}`;
+}
+function pickZp(idx){ zp.answers[zp.i]=idx; renderZpQuestion(); }
+function zpNav(d){ zp.i=Math.min(zp.qs.length-1, Math.max(0, zp.i+d)); renderZpQuestion(); $view().scrollTop=0; }
+function cancelZp(){ if(confirm("Prüfung wirklich abbrechen? Der Fortschritt geht verloren.")){ go("zpSelect"); } }
+function submitZp(){
+  if(zp.submitted) return;
+  zp.submitted=true;
+  stopTimer();
+  let score=0;
+  zp.qs.forEach((q,i)=>{
+    if(zp.answers[i]===q.c){ score++; }
+    else { addToKartei(zp.mod, q); }
+  });
+  const note=swissNote(score, zp.qs.length);
+  zp.score=score; zp.note=note;
+  S.results.push({d:today(), m:zp.mod, note:note, s:score, x:zp.qs.length});
+  markDailyActivity();
+  S.xp += score*10 + (note>=5?30:note>=4?15:0);
+  save();
+  go("zpDone");
+}
+function rZpDone(){
+  const m=modById(zp.mod);
+  const pct=zp.score/zp.qs.length;
+  const circ=2*Math.PI*54;
+  const col = zp.note>=4 ? "var(--ok)" : "var(--bad)";
+  const review=zp.qs.map((q,i)=>{
+    const good=zp.answers[i]===q.c;
+    const given=zp.answers[i]===null ? "–" : "ABCD"[zp.answers[i]]+": "+q.o[zp.answers[i]];
+    return `<div class="review-q ${good?"good":"badq"}">
+      <div class="rq-t">${i+1}. ${esc(q.t)}</div>
+      <div class="rq-a"><span>${good?"✅":"❌"}</span>
+        <span>Deine Antwort: <b>${esc(given)}</b>${good?"":`<br>Richtig: <b>${"ABCD"[q.c]}: ${esc(q.o[q.c])}</b><br><span style="font-size:12px">🤖 ${esc(q.e)}</span>`}</span>
+      </div>
+    </div>`;
+  }).join("");
+  $view().innerHTML = `
+    <div class="grade-wrap">
+      <div class="gauge">
+        <svg width="170" height="170" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="54" fill="none" stroke="var(--track)" stroke-width="11"/>
+          <circle cx="65" cy="65" r="54" fill="none" stroke="${col}" stroke-width="11"
+            stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-pct)}"
+            style="transition:stroke-dashoffset 1s ease"/>
+        </svg>
+        <div class="gnum">
+          <div class="note" style="color:${col}">${fmtNote(zp.note)}</div>
+          <div class="nlbl">Note</div>
+        </div>
+      </div>
+      <div class="screen-title" style="font-size:20px">${zp.note>=5.5?"Hervorragend!":zp.note>=5?"Stark! 🎉":zp.note>=4?"Bestanden ✓":"Noch nicht bestanden"}</div>
+      <p class="screen-sub">${m.icon} ${esc(m.name)} · ${zp.score}/${zp.qs.length} Punkte · gespeichert</p>
+      ${zp.qs.length-zp.score>0?`<span class="chip" style="margin-bottom:8px">🗂️ ${zp.qs.length-zp.score} Frage${zp.qs.length-zp.score===1?"":"n"} in die Fehler-Kartei gelegt</span>`:""}
+    </div>
+    <div class="grid2" style="margin-bottom:14px">
+      <button class="btn ghost" onclick="startZp('${zp.mod}')">Nochmals</button>
+      <button class="btn" onclick="go('stats')">Zur Statistik</button>
+    </div>
+    <b style="font-size:13px;color:var(--chipfg)">Auswertung</b>
+    <div style="height:8px"></div>
+    ${review}`;
+  if(zp.note>=5){ confetti(); playFanfare(); }
+}
+
+/* ---------- Statistik ---------- */
+function rStats(){
+  const res=S.results.slice().reverse();
+  const avg = S.results.length ? (S.results.reduce((a,x)=>a+x.note,0)/S.results.length) : 0;
+  const rows = res.length ? res.map(x=>{
+    const m=modById(x.m);
+    return `<div class="result-row">
+      <span>${m.icon}</span>
+      <div><b>${esc(m.name)}</b><br><span style="font-size:11.5px;color:var(--muted)">${esc(x.d)} · ${x.s}/${x.x} Punkte</span></div>
+      <span class="rnote ${x.note>=4?"g":"b"}">${fmtNote(x.note)}</span>
+    </div>`;
+  }).join("") : `<p style="font-size:13px;color:var(--muted);text-align:center;padding:10px 0">Noch keine ZP absolviert – starte deine erste im ZP-Modus. ⚡</p>`;
+
+  const perMod = playable().map(m=>{
+    const r=S.results.filter(x=>x.m===m.id);
+    const best=r.reduce((a,x)=>Math.max(a,x.note),0);
+    const p=Math.min(100, Math.round(r.length/3*100));
+    return `<div style="margin-bottom:12px">
+      <div class="row" style="margin-bottom:5px;font-size:12.5px">
+        <span style="font-weight:600">${m.icon} ${esc(m.name)}</span>
+        <span style="color:var(--muted)">${r.length}/3 ZPs${best?` · Beste ${fmtNote(best)}`:""}</span>
+      </div>
+      <div class="progress"><i style="width:${p}%"></i></div>
+    </div>`;
+  }).join("");
+
+  const badges=[
+    {i:"⚡", n:"Erste ZP",      ok:S.results.length>=1},
+    {i:"🏅", n:"Note 5+",       ok:S.results.some(x=>x.note>=5)},
+    {i:"🔥", n:"7-Tage-Streak", ok:S.streak>=7},
+    {i:"💯", n:"500 XP",        ok:S.xp>=500},
+    {i:"📚", n:"3 Module",      ok:new Set(S.results.map(x=>x.m)).size>=3},
+    {i:"👑", n:"Master-Rang",   ok:S.xp>=1200}
+  ].map(b=>`<div class="badge ${b.ok?"":"off"}"><span class="bico">${b.i}</span><span class="bname">${b.n}</span></div>`).join("");
+
+  $view().innerHTML = `
+    <div class="screen-title">Statistik</div>
+    <p class="screen-sub">Dein Lernfortschritt über alle Module.</p>
+    <div class="grid2" style="margin-bottom:12px">
+      <div class="stat-tile"><div class="big" style="color:${avg>=4?"var(--ok)":"var(--bad)"}">${avg?avg.toFixed(1):"–"}</div><div class="lbl">Ø Note</div></div>
+      <div class="stat-tile"><div class="big">${S.results.length}</div><div class="lbl">ZPs absolviert</div></div>
+    </div>
+    <div class="card"><b style="font-size:13.5px">Fortschritt pro Modul</b><div style="height:12px"></div>${perMod}</div>
+    <div class="card"><b style="font-size:13.5px">Notenverlauf</b><div style="height:4px"></div>${rows}</div>
+    <b style="font-size:13.5px;color:var(--chipfg)">Abzeichen</b>
+    <div style="height:8px"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${badges}</div>`;
+}
+
+/* ---------- Profil ---------- */
+function rProfile(){
+  const r=rank();
+  $view().innerHTML = `
+    <div class="screen-title">Profil</div>
+    <p class="screen-sub">Konto & Einstellungen (Demo).</p>
+    <div class="card" style="text-align:center;padding:22px">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--brand-soft);color:var(--brand);
+        font-family:'Archivo';font-weight:900;font-size:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+        ${esc(S.user.name.trim().charAt(0).toUpperCase())}
+      </div>
+      <b style="font-size:17px">${esc(S.user.name)}</b>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:3px">
+        ${esc(S.user.lj)} · WISS Zürich${S.user.ms?`<br>${esc(S.user.mail)} · Microsoft-Konto`:""}
+      </p>
+      <div style="height:12px"></div>
+      <span class="chip">${r.icon} ${esc(r.name)}</span>
+      <span class="chip fire">🔥 ${S.streak} Tage</span>
+      <span class="chip green">${S.xp} XP</span>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <b style="font-size:14px">${S.theme==="dark"?"🌙":"☀️"} Erscheinungsbild</b>
+          <p style="font-size:12px;color:var(--muted);margin-top:3px">Aktuell: ${S.theme==="dark"?"Dunkelmodus":"Hellmodus"}</p>
+        </div>
+        <button class="btn small" style="width:auto;padding:9px 14px" onclick="toggleTheme(true)">${S.theme==="dark"?"Hell":"Dunkel"}</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <b style="font-size:14px">🔄 wiss.tocco.ch</b>
+          <p style="font-size:12px;color:var(--muted);margin-top:3px">
+            ${S.tocco ? "✓ Verbunden · Stundenplan & Modulbelegung abgeglichen<br>Letzte Synchronisation: "+esc(S.tocco) : "Nicht verbunden – gleiche Stundenplan, Module und Prüfungstermine ab (Demo)."}
+          </p>
+        </div>
+        <button class="btn small" style="width:auto;padding:9px 14px" onclick="toccoSync()">${S.tocco?"Sync":"Verbinden"}</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <b style="font-size:14px">${S.sound?"🔊":"🔇"} Soundeffekte</b>
+          <p style="font-size:12px;color:var(--muted);margin-top:3px">Fanfare & Konfetti bei Note 5+ · aktuell ${S.sound?"an":"aus"}</p>
+        </div>
+        <button class="btn small" style="width:auto;padding:9px 14px" onclick="toggleSound()">${S.sound?"Aus":"An"}</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <b style="font-size:14px">🧑‍🏫 Lehrpersonen-Modus</b>
+          <p style="font-size:12px;color:var(--muted);margin-top:3px">Content-Verwaltung: Fragen erfassen und einsehen.</p>
+        </div>
+        <button class="btn small" style="width:auto;padding:9px 14px" onclick="go('admin')">Öffnen</button>
+      </div>
+    </div>
+
+    <div class="card soft">
+      <b style="font-size:13px">🔒 Datenschutz (Prototyp)</b>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.55">
+        Es werden keine Daten an einen Server gesendet. Anmeldung, Microsoft-Login und Tocco-Sync sind simuliert; Fortschritt, XP und eigene Fragen bleiben ausschliesslich lokal in diesem Browser (DSG-Prinzip Datensparsamkeit).
+      </p>
+    </div>
+    <button class="btn ghost" style="margin-bottom:10px" onclick="resetDemo()">Demo-Daten zurücksetzen</button>
+    <button class="btn" onclick="logout()">Abmelden</button>`;
+}
+function toccoSync(){
+  showOverlay(
+    "Verbinde mit wiss.tocco.ch …",
+    "Stundenplan, Modulbelegung und Prüfungstermine werden abgeglichen (simuliert – produktiv via Tocco-Schnittstelle).",
+    1500,
+    ()=>{
+      S.tocco = today()+" "+nowTime();
+      save(); go("profile");
+    }
+  );
+}
+function resetDemo(){
+  if(confirm("Alle Demo-Daten (Fortschritt, Noten, eigene Fragen, Tocco-Verbindung) zurücksetzen?")){
+    const u=S.user, th=S.theme; S=DEFAULT_STATE(); S.user=u; S.theme=th; save(); go("home");
+  }
+}
+function logout(){ S.user=null; save(); go("login"); }
+
+/* ---------- Admin / Content-Verwaltung ---------- */
+let adminMod="net";
+function rAdmin(){
+  const opts=playable().map(m=>`<option value="${m.id}" ${m.id===adminMod?"selected":""}>${esc(m.name)}</option>`).join("");
+  const base=QUESTIONS[adminMod], cust=S.custom[adminMod]||[];
+  const list = base.concat(cust).map((q,i)=>`
+    <div class="qitem">
+      <span class="qn">${i+1}.</span>
+      <span>${esc(q.t)}${i>=base.length?'<span class="tag-custom">NEU</span>':""}</span>
+    </div>`).join("");
+  $view().innerHTML = `
+    <div class="row" style="margin-bottom:6px">
+      <div class="screen-title" style="margin:0">Content-Verwaltung</div>
+      <button class="btn ghost small" style="width:auto;padding:8px 12px" onclick="go('profile')">Zurück</button>
+    </div>
+    <p class="screen-sub">Lehrpersonen erfassen und pflegen hier die Fragen pro Modul.</p>
+    <label class="fl" for="adm-mod">Modul</label>
+    <select id="adm-mod" onchange="adminMod=this.value; rAdmin()">${opts}</select>
+    <div style="height:14px"></div>
+    <div class="card">
+      <div class="row">
+        <div>
+          <b style="font-size:14px">📤 Notenexport</b>
+          <p style="font-size:12px;color:var(--muted);margin-top:3px">${S.results.length} ZP-Resultat${S.results.length===1?"":"e"} als CSV für Excel (Semikolon, CH-Format).</p>
+        </div>
+        <button class="btn small" style="width:auto;padding:9px 14px" onclick="exportCSV()" ${S.results.length?"":"disabled"}>CSV</button>
+      </div>
+    </div>
+    <div class="card">
+      <b style="font-size:13.5px">Neue Frage erfassen</b>
+      <label class="fl" for="aq-t">Fragetext</label>
+      <textarea id="aq-t" rows="2" placeholder="z.B. Welcher Port gehört zu SSH?"></textarea>
+      <div class="grid2">
+        <div><label class="fl" for="aq-a">Antwort A</label><input type="text" id="aq-a"></div>
+        <div><label class="fl" for="aq-b">Antwort B</label><input type="text" id="aq-b"></div>
+        <div><label class="fl" for="aq-c">Antwort C</label><input type="text" id="aq-c"></div>
+        <div><label class="fl" for="aq-d">Antwort D</label><input type="text" id="aq-d"></div>
+      </div>
+      <label class="fl" for="aq-cor">Richtige Antwort</label>
+      <select id="aq-cor"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
+      <label class="fl" for="aq-e">Erklärung (KI-Tutor)</label>
+      <textarea id="aq-e" rows="2" placeholder="Kurze fachliche Erklärung…"></textarea>
+      <div style="height:14px"></div>
+      <button class="btn red" onclick="addQuestion()">Frage speichern</button>
+      <p id="aq-msg" style="font-size:12px;margin-top:8px;text-align:center"></p>
+    </div>
+    <b style="font-size:13.5px;color:var(--chipfg)">Fragen in diesem Modul (${base.length+cust.length})</b>
+    <div style="height:8px"></div>
+    ${list}`;
+}
+function addQuestion(){
+  const t=document.getElementById("aq-t").value.trim();
+  const o=["aq-a","aq-b","aq-c","aq-d"].map(id=>document.getElementById(id).value.trim());
+  const c=parseInt(document.getElementById("aq-cor").value,10);
+  const e=document.getElementById("aq-e").value.trim()||"Siehe Modulunterlagen.";
+  const msg=document.getElementById("aq-msg");
+  if(!t || o.some(x=>!x)){
+    msg.textContent="⚠️ Bitte Fragetext und alle vier Antworten ausfüllen.";
+    msg.style.color="var(--bad)";
+    return;
+  }
+  if(!S.custom[adminMod]) S.custom[adminMod]=[];
+  S.custom[adminMod].push({t:t,o:o,c:c,e:e});
+  save();
+  rAdmin();
+  const m2=document.getElementById("aq-msg");
+  m2.textContent="✅ Frage gespeichert – sie erscheint ab sofort in Lerneinheiten und ZPs.";
+  m2.style.color="var(--ok)";
+}
+
+/* ---------- Start ---------- */
+load();
+applyTheme();
+go(S.user ? "home" : "login");
+window.addEventListener("load", initQR);
+</script>
+</body>
+</html>
